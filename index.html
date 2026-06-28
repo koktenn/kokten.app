@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <!-- Mobilde yakınlaştırmayı kapatarak native uygulama hissiyatı veriyoruz -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kökten - Güvenli İndir</title>
+    
+    <style>
+        :root {
+            --bg-dark: #09090b;
+            --card-bg: #121214;
+            --text-primary: #f8f9fa;
+            --text-secondary: #8b8b99;
+            --btn-bg: #ffffff;
+            --btn-text: #000000;
+            --btn-active: #e0e0e0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            /* Mobilde metin seçmeyi ve dokunma vurgusunu kapatıp gecikmeyi önlüyoruz */
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 40px 24px;
+            border-radius: 28px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 380px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .logo-container {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .logo {
+            width: 96px;
+            height: 96px;
+            border-radius: 22px;
+            object-fit: cover;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            display: block;
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .description {
+            color: var(--text-secondary);
+            font-size: 15px;
+            margin-bottom: 32px;
+            font-weight: 400;
+        }
+
+        /* Butonun tamamını kaplayan, her pikseli tıklanabilir alan */
+        .download-wrapper {
+            width: 100%;
+            position: relative;
+        }
+
+        .download-btn {
+            background-color: var(--btn-bg);
+            color: var(--btn-text);
+            width: 100%;
+            padding: 18px 24px;
+            border: none;
+            border-radius: 16px;
+            font-size: 17px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.15s ease-out;
+            /* Mobilde dokunma eylemlerini hızlandırır */
+            touch-action: manipulation;
+        }
+
+        /* Dokunulduğu andaki anlık tepki */
+        .download-btn:active {
+            transform: scale(0.96);
+            background-color: var(--btn-active);
+        }
+
+        .download-btn svg {
+            width: 22px;
+            height: 22px;
+            transition: transform 0.3s ease;
+        }
+
+        /* İndirme başladığında ikon animasyonu */
+        .downloading svg {
+            transform: translateY(4px);
+        }
+
+        .file-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-top: 24px;
+            font-weight: 500;
+            background: rgba(255,255,255,0.05);
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+        
+        .version-badge {
+            color: #4CAF50;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="logo-container">
+            <img src="https://i.ibb.co/kVmq05qy/1781698182232-edit-72885968798444.png" alt="Kökten Logo" class="logo">
+        </div>
+        
+        <h2>Kökten</h2>
+        <p class="description">Resmi Android Sürümü</p>
+        
+        <div class="download-wrapper">
+            <!-- href yerine butona onClick vererek JavaScript ile anında tetikleme yapıyoruz -->
+            <button id="downloadBtn" class="download-btn" onclick="startDownload()">
+                <svg id="downloadIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                <span id="btnText">APK'yı İndir</span>
+            </button>
+        </div>
+        
+        <div class="file-info">
+            <span>kokten.apk</span>
+            <span>•</span>
+            <span class="version-badge">✅ </span>
+            <span>•</span>
+            <span>36.61 MB</span>
+        </div>
+    </div>
+
+    <script>
+        function startDownload() {
+            const btn = document.getElementById('downloadBtn');
+            const btnText = document.getElementById('btnText');
+            
+            // Eğer zaten basıldıysa çift tıklamayı önle
+            if (btn.classList.contains('downloading')) return;
+
+            // 1. Görsel Geri Bildirim: Kullanıcıya anında tepki ver
+            btn.classList.add('downloading');
+            btnText.innerText = 'İndirme Başlatılıyor...';
+            btn.style.opacity = '0.8';
+
+            // 2. Gizli bir link (a etiketi) oluşturup indirmeyi zorla
+            // Bu yöntem tarayıcının linki algılayıp direkt indirme motoruna iletmesini sağlar.
+            const hiddenLink = document.createElement('a');
+            hiddenLink.href = 'kokten.apk';
+            hiddenLink.download = 'kokten.apk';
+            
+            // Linki sayfaya ekle, tıkla ve anında sil (arka planda milisaniyeler içinde gerçekleşir)
+            document.body.appendChild(hiddenLink);
+            hiddenLink.click();
+            document.body.removeChild(hiddenLink);
+
+            // 3. Butonu 2 saniye sonra eski haline getir (indirme arka planda devam eder)
+            setTimeout(() => {
+                btn.classList.remove('downloading');
+                btnText.innerText = 'APK\'yı İndir';
+                btn.style.opacity = '1';
+            }, 2000);
+        }
+    </script>
+
+</body>
+</html>
