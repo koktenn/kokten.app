@@ -1,1 +1,1 @@
-# kokten.apk
+# kokten.app
